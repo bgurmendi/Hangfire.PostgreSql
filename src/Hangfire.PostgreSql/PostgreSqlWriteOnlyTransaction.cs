@@ -61,22 +61,50 @@ namespace Hangfire.PostgreSql
 
         public void Commit()
         {
-            using (var transaction = _connection.BeginTransaction(IsolationLevel.RepeatableRead))
-            {
-
-                foreach (var command in _commandQueue)
+            NpgsqlTransaction transaction=null;
+            try{
+                transaction = _connection.BeginTransaction(IsolationLevel.RepeatableRead);
+            }catch(InvalidOperationException e){
+                
+            }
+            if(transaction!=null){
+                using (transaction)
                 {
-                    try
-                    {
-                        command(_connection, transaction);
-                    }
-                    catch
-                    {
-                        throw;
-                    }
+                    DoCommands(transaction);
+                    transaction.Commit();
+                    PostgreSqlJobQueue.NewItemInQueueEvent.Set();
                 }
-                transaction.Commit();
-                PostgreSqlJobQueue.NewItemInQueueEvent.Set();
+            }else{
+                DoCommands(null);
+                _connection.Disposed += (object sender, EventArgs e) => {
+                    PostgreSqlJobQueue.ThereIsWork = false;
+                    PostgreSqlJobQueue.NewItemInQueueEvent.Set();
+                };
+                PostgreSqlJobQueue.ThereIsWork = true;
+                // Debo anotar que está pendiente el PostgreSqlJobQueue.NewItemInQueueEvent.Set();
+                // Debe ejecutarse despues de commit. PAra lograr tiempor de respuesta 0 en las tareas de fondo.
+            }
+          
+           
+
+
+            //PostgreSqlJobQueue.NewItemInQueueEvent.Set();
+        }
+
+     
+
+
+        private void DoCommands(NpgsqlTransaction transaction){
+            foreach (var command in _commandQueue)
+            {
+                try
+                {
+                    command(_connection, transaction);
+                }
+                catch
+                {
+                    throw;
+                }
             }
         }
 

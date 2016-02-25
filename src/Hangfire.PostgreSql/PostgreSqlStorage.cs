@@ -41,6 +41,8 @@ namespace Hangfire.PostgreSql
         {
         }
 
+     
+
         /// <summary>
         /// Initializes PostgreSqlStorage from the provided PostgreSqlStorageOptions and either the provided connection
         /// string or the connection string with provided name pulled from the application config file.       
@@ -185,6 +187,13 @@ namespace Hangfire.PostgreSql
             var connectionStringSetting = ConfigurationManager.ConnectionStrings[connectionStringName];
 
             return connectionStringSetting != null;
+        }
+
+        public static void PickWorkNow(){
+            if(PostgreSqlJobQueue.ThereIsWork){
+                PostgreSqlJobQueue.ThereIsWork = false;
+                PostgreSqlJobQueue.NewItemInQueueEvent.Set();
+            }
         }
     }
 }
