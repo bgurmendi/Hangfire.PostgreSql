@@ -29,19 +29,19 @@ using Hangfire.Server;
 
 namespace Hangfire.PostgreSql
 {
-    internal class ExpirationManager : IServerComponent
-    {
-        private static readonly TimeSpan DelayBetweenPasses = TimeSpan.FromSeconds(1);
-        private const int NumberOfRecordsInSinglePass = 1000;
+	internal class ExpirationManager : IServerComponent
+	{
+		private static readonly TimeSpan DelayBetweenPasses = TimeSpan.FromSeconds(1);
+		private const int NumberOfRecordsInSinglePass = 1000;
 
-        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
-        private static readonly string[] ProcessedTables =
-        {
+		private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
+		private static readonly string[] ProcessedTables = {
             "counter",
             "job",
             "list",
             "set",
             "hash",
+			"lock",
         };
 
         private readonly PostgreSqlStorage _storage;
