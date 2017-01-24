@@ -24,6 +24,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Threading;
 using Dapper;
+using Hangfire.Logging;
 
 namespace Hangfire.PostgreSql
 {
@@ -33,6 +34,7 @@ namespace Hangfire.PostgreSql
 		private readonly string _resource;
 		private readonly PostgreSqlStorageOptions _options;
 		private bool _completed;
+		private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
 		public PostgreSqlDistributedLock(string resource, TimeSpan timeout, IDbConnection connection,
 		                                 PostgreSqlStorageOptions options)
@@ -86,7 +88,8 @@ WHERE NOT EXISTS (
 					}
 					if (rowsAffected > 0)
 						return;
-				} catch (Exception) {
+				} catch (Exception e) {
+					Logger.TraceException("PostgreSqlDistributedLock_Init_Transaction",e);
 				}
 
 				if (lockAcquiringTime.ElapsedMilliseconds > timeout.TotalMilliseconds)
@@ -136,7 +139,8 @@ WHERE NOT EXISTS (
      resource = resource,
 							timeout = timeout//String.Format("{0} milliseconds", timeout.TotalMilliseconds.ToString("0"))
  });
-				} catch (Exception) {
+				} catch (Exception e) {
+					Logger.TraceException("PostgreSqlDistributedLock",e);
 				}
 
 				int rowsAffected = _connection.Execute(@"UPDATE """ + _options.SchemaName + @""".""lock"" SET ""updatecount"" = 1 WHERE ""updatecount"" = 0");
