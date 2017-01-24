@@ -351,14 +351,20 @@ WHERE NOT EXISTS (
     AND ""updatedrows"".""field"" = ""insertvalues"".""field""
 );
 ";
+            NpgsqlTransaction transaction=null;
+            try{                
+				transaction = _connection.BeginTransaction(IsolationLevel.Serializable);                
+            }catch(InvalidOperationException e){
 
-            using (var transaction = _connection.BeginTransaction(IsolationLevel.Serializable))
+            }
+
+            using (transaction)
             {
                 foreach (var keyValuePair in keyValuePairs)
                 {
                     _connection.Execute(sql, new { key = key, field = keyValuePair.Key, value = keyValuePair.Value }, transaction);
                 }
-                transaction.Commit();
+                if(transaction!=null) transaction.Commit();
             }
         }
 
