@@ -77,7 +77,7 @@ WHERE ""id"" IN (
     FROM """ + _options.SchemaName + @""".""jobqueue"" 
     WHERE ""queue"" = ANY (@queues)
     AND ""fetchedat"" {0} 
-    ORDER BY ""fetchedat"", ""jobid""
+    ORDER BY ""queue"", ""fetchedat"", ""jobid""
     LIMIT 1
 )
 RETURNING ""id"" AS ""Id"", ""jobid"" AS ""JobId"", ""queue"" AS ""Queue"", ""fetchedat"" AS ""FetchedAt"";
@@ -147,7 +147,7 @@ SELECT ""id"" AS ""Id"", ""jobid"" AS ""JobId"", ""queue"" AS ""Queue"", ""fetch
 FROM """ + _options.SchemaName + @""".""jobqueue"" 
 WHERE ""queue"" = ANY (@queues)
 AND ""fetchedat"" {0} 
-ORDER BY ""fetchedat"", ""jobid"" 
+ORDER BY ""queue"", ""fetchedat"", ""jobid"" 
 LIMIT 1;
 ";
 
