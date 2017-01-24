@@ -125,7 +125,7 @@ AND resource = @resource;", new {resource = resource});
 
 
 					_connection.Execute(@"
-INSERT INTO """ + _options.SchemaName + @""".lock(resource, updatecount, expireat 
+INSERT INTO """ + _options.SchemaName + @""".lock(resource, updatecount, expireat) 
 SELECT @resource, 0, CURRENT_TIMESTAMP + @timeout 
 WHERE NOT EXISTS (
     SELECT 1 FROM """ + _options.SchemaName + @""".""lock"" 
