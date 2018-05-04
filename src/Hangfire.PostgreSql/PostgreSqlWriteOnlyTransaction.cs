@@ -64,8 +64,10 @@ namespace Hangfire.PostgreSql
             NpgsqlTransaction transaction=null;
             try{
                 transaction = _connection.BeginTransaction(IsolationLevel.RepeatableRead);
-            }catch(InvalidOperationException e){
+            }catch(InvalidOperationException){
                 
+            }catch(NotSupportedException){
+
             }
             if(transaction!=null){
                 using (transaction)
